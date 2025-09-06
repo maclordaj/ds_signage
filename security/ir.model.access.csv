@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ds_asset_user,access_ds_asset_user,model_ds_asset,base.group_user,1,1,1,1
+access_ds_playlist_user,access_ds_playlist_user,model_ds_playlist,base.group_user,1,1,1,1
+access_ds_playlist_item_user,access_ds_playlist_item_user,model_ds_playlist_item,base.group_user,1,1,1,1
+access_ds_screen_user,access_ds_screen_user,model_ds_screen,base.group_user,1,1,1,1

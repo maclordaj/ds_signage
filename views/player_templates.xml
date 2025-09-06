@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="player" name="Digital Signage Player">
+        <t t-set="title" t-value="title or 'Digital Signage'"/>
+        <t t-call="web.layout">
+            <t t-set="title" t-value="title"/>
+            <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen"/>
+            </t>
+            <t t-call-assets="web.assets_frontend"/>
+            <div id="ds_player_root" class="ds-player-root">
+                <div id="ds_player" class="ds-player"></div>
+                <div id="ds_fullscreen_btn" class="ds-fullscreen-btn" title="Enter Fullscreen">⛶</div>
+            </div>
+            <!-- Safe JSON embedding to avoid </script> breaking the page -->
+            <script id="ds_slides" type="application/json"><t t-raw="slides_json"/></script>
+            <script id="ds_meta" type="application/json"><t t-raw="meta_json"/></script>
+        </t>
+    </template>
+</odoo>

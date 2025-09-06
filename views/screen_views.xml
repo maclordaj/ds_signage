@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ds_screen_list" model="ir.ui.view">
+        <field name="name">ds.screen.list</field>
+        <field name="model">ds.screen</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="playlist_id"/>
+                <field name="token"/>
+                <field name="last_ping"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ds_screen_form" model="ir.ui.view">
+        <field name="name">ds.screen.form</field>
+        <field name="model">ds.screen</field>
+        <field name="arch" type="xml">
+            <form string="Screen">
+                <header>
+                    <button name="action_open_player" type="object" string="Open Player" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="playlist_id"/>
+                        <field name="token" readonly="1"/>
+                        <field name="is_public"/>
+                        <field name="active"/>
+                    </group>
+                    <group>
+                        <field name="last_ping" readonly="1"/>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

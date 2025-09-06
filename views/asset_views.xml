@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ds_asset_list" model="ir.ui.view">
+        <field name="name">ds.asset.list</field>
+        <field name="model">ds.asset</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="duration"/>
+                <field name="url"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ds_asset_form" model="ir.ui.view">
+        <field name="name">ds.asset.form</field>
+        <field name="model">ds.asset</field>
+        <field name="arch" type="xml">
+            <form string="Asset">
+                <sheet>
+                    <group>
+                        <field name="type"/>
+                        <field name="file" filename="file_name"/>
+                        <field name="file_name" invisible="type not in ('image', 'video')"/>
+                        <field name="file_mimetype" invisible="type not in ('image', 'video')"/>
+                        <field name="url" invisible="type not in ['video_url', 'youtube', 'webpage', 'calendar']"/>
+                        <field name="qweb_key" invisible="type != 'qweb'"/>
+                        <field name="duration"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

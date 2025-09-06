@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ds_playlist_list" model="ir.ui.view">
+        <field name="name">ds.playlist.list</field>
+        <field name="model">ds.playlist</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ds_playlist_form" model="ir.ui.view">
+        <field name="name">ds.playlist.form</field>
+        <field name="model">ds.playlist</field>
+        <field name="arch" type="xml">
+            <form string="Playlist">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                        <field name="auto_unmute"/>
+                    </group>
+                    <notebook>
+                        <page string="Items">
+                            <field name="item_ids">
+                                <list editable="bottom">
+                                    <field name="sequence"/>
+                                    <field name="asset_id"/>
+                                    <field name="duration_override"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_ds_root" name="Digital Signage" sequence="40"/>
+
+    <record id="action_ds_assets" model="ir.actions.act_window">
+        <field name="name">Assets</field>
+        <field name="res_model">ds.asset</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_ds_assets" name="Assets" parent="menu_ds_root" action="action_ds_assets"/>
+
+    <record id="action_ds_playlists" model="ir.actions.act_window">
+        <field name="name">Playlists</field>
+        <field name="res_model">ds.playlist</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_ds_playlists" name="Playlists" parent="menu_ds_root" action="action_ds_playlists"/>
+
+    <record id="action_ds_screens" model="ir.actions.act_window">
+        <field name="name">Screens</field>
+        <field name="res_model">ds.screen</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem id="menu_ds_screens" name="Screens" parent="menu_ds_root" action="action_ds_screens"/>
+</odoo>
