@@ -21,11 +21,12 @@
             <form string="Asset">
                 <sheet>
                     <group>
+                        <field name="name" required="1"/>
                         <field name="type"/>
                         <field name="file" filename="file_name"/>
                         <field name="file_name" invisible="type not in ('image', 'video')"/>
                         <field name="file_mimetype" invisible="type not in ('image', 'video')"/>
-                        <field name="url" invisible="type not in ['video_url', 'youtube', 'webpage', 'calendar']"/>
+                        <field name="url" invisible="type not in ['video_url', 'youtube', 'webpage', 'calendar', 'qweb']"/>
                         <field name="qweb_key" invisible="type != 'qweb'"/>
                         <field name="duration"/>
                         <field name="active"/>

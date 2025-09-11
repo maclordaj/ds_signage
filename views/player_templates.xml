@@ -20,4 +20,54 @@
             <script id="ds_meta" type="application/json"><t t-raw="meta_json"/></script>
         </t>
     </template>
+
+    <!-- Sample QWeb template: Split layout with playlist embed and custom content -->
+    <template id="split_sample" name="Split Layout Sample">
+        <div class="ds-split-container">
+            <div class="ds-split-left">
+                <h2>Live Playlist</h2>
+                <iframe t-attf-src="/ds/p/#{playlist.id if playlist else '1'}" 
+                        class="ds-split-frame" 
+                        allow="autoplay; fullscreen"></iframe>
+            </div>
+            <div class="ds-split-right">
+                <div class="ds-split-content">
+                    <h1>Welcome to Digital Signage</h1>
+                    <p>Current time: <span t-esc="datetime.datetime.now().strftime('%H:%M')"/></p>
+                    <p>Screen: <span t-esc="screen.name if screen else 'Preview'"/></p>
+                    <div class="ds-split-info">
+                        <h3>Today's Highlights</h3>
+                        <ul>
+                            <li>Interactive displays available</li>
+                            <li>Auto-updating content</li>
+                            <li>Multi-media support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Calendar list template for embedding -->
+    <template id="calendar_list" name="Calendar Events List">
+        <div class="ds-calendar-container">
+            <h2 class="ds-calendar-title">Upcoming Events</h2>
+            <div class="ds-calendar-events">
+                <t t-foreach="events" t-as="event">
+                    <div class="ds-calendar-event">
+                        <div class="ds-event-time">
+                            <span t-esc="event.start.strftime('%H:%M')"/>
+                        </div>
+                        <div class="ds-event-details">
+                            <h4 t-esc="event.name"/>
+                            <p t-if="event.location" t-esc="event.location"/>
+                        </div>
+                    </div>
+                </t>
+                <div t-if="not events" class="ds-no-events">
+                    No events scheduled for today
+                </div>
+            </div>
+        </div>
+    </template>
 </odoo>

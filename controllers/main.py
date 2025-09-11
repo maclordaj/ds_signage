@@ -279,3 +279,33 @@ class DsSignageController(http.Controller):
         if is_video:
             headers.append(('Accept-Ranges', 'bytes'))
         return request.make_response(data, headers=headers)
+
+    @http.route(['/ds/calendar'], type='http', auth='public', methods=['GET'], csrf=False)
+    def calendar_events(self, **kwargs):
+        """Public calendar events list for embedding in digital signage"""
+        try:
+            # Get today's events from calendar.event model
+            from datetime import datetime, timedelta
+            today = datetime.now().date()
+            tomorrow = today + timedelta(days=1)
+            
+            # Search for today's events
+            events = request.env['calendar.event'].sudo().search([
+                ('start', '>=', today),
+                ('start', '<', tomorrow),
+            ], order='start asc', limit=10)
+            
+            values = {
+                'events': events,
+                'today': today,
+            }
+            return request.render('ds_signage.calendar_list', values)
+            
+        except Exception as e:
+            _logger.warning(f"Calendar events error: {e}")
+            # Fallback with empty events
+            values = {
+                'events': [],
+                'today': datetime.now().date(),
+            }
+            return request.render('ds_signage.calendar_list', values)

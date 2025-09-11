@@ -103,6 +103,140 @@ html, body {
   font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
 }
 
+/* Split layout styles for QWeb templates */
+.ds-split-container {
+  display: flex;
+  height: 100vh;
+  background: #000;
+  color: #fff;
+}
+
+.ds-split-left, .ds-split-right {
+  flex: 1;
+  padding: 20px;
+}
+
+.ds-split-left {
+  background: #111;
+  border-right: 2px solid #333;
+}
+
+.ds-split-right {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-split-frame {
+  width: 100%;
+  height: calc(100% - 60px);
+  border: 0;
+  border-radius: 8px;
+}
+
+.ds-split-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.ds-split-content h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.ds-split-content p {
+  font-size: 1.2em;
+  margin: 10px 0;
+  color: #ccc;
+}
+
+.ds-split-info {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.ds-split-info h3 {
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.ds-split-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.ds-split-info li {
+  padding: 8px 0;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+}
+
+/* Calendar list styles */
+.ds-calendar-container {
+  padding: 20px;
+  background: #000;
+  color: #fff;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.ds-calendar-title {
+  font-size: 2em;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #fff;
+  border-bottom: 2px solid #333;
+  padding-bottom: 15px;
+}
+
+.ds-calendar-events {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ds-calendar-event {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 10px;
+  background: #111;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.ds-event-time {
+  min-width: 80px;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.ds-event-details {
+  flex: 1;
+  margin-left: 20px;
+}
+
+.ds-event-details h4 {
+  margin: 0 0 5px 0;
+  color: #fff;
+  font-size: 1.2em;
+}
+
+.ds-event-details p {
+  margin: 0;
+  color: #ccc;
+  font-size: 0.9em;
+}
+
+.ds-no-events {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
 /* Kiosk mode - hide scrollbars and browser UI */
 ::-webkit-scrollbar { display: none; }
 html { -ms-overflow-style: none; scrollbar-width: none; }

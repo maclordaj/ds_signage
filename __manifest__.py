@@ -7,7 +7,7 @@
     "author": "A Brand Inc.",
     "website": "https://abrandinc.com",
     "license": "LGPL-3",
-    "depends": ["base", "web"],
+    "depends": ["base", "web", "calendar"],
     "data": [
         "security/security.xml",
         "security/ir.model.access.csv",
