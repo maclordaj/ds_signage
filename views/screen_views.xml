@@ -26,6 +26,7 @@
                     <group>
                         <field name="name"/>
                         <field name="playlist_id"/>
+                        <field name="preloader_asset_id" domain="[('type', 'in', ['image', 'video'])]"/>
                         <field name="token" readonly="1"/>
                         <field name="is_public"/>
                         <field name="active"/>

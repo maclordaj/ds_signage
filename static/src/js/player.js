@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const slides = Array.isArray(readJsonScript('ds_slides')) ? readJsonScript('ds_slides') : [];
   const meta = readJsonScript('ds_meta') || {};
   const autoUnmute = meta.auto_unmute || false;
+  const preloaderConfig = meta.preloader || null;
   const root = document.getElementById('ds_player_root');
   const container = document.getElementById('ds_player');
   
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let idx = -1;
   let timer = null;
+  let preloaderOverlay = null;
 
   function clear() {
     if (timer) {
@@ -67,6 +69,44 @@ document.addEventListener('DOMContentLoaded', function() {
       if (k in el) el[k] = v; else el.setAttribute(k, v);
     });
     return el;
+  }
+
+  function showPreloader() {
+    if (!preloaderConfig || !preloaderConfig.src) {
+      console.log('DS Player: No preloader configured');
+      return;
+    }
+    
+    console.log('DS Player: Showing preloader');
+    hidePreloader(); // Remove any existing preloader first
+    
+    preloaderOverlay = mk('div', { className: 'ds-preloader-overlay' });
+    
+    if (preloaderConfig.type === 'image') {
+      const img = mk('img', { src: preloaderConfig.src, className: 'ds-preloader-content' });
+      preloaderOverlay.appendChild(img);
+    } else if (preloaderConfig.type === 'video') {
+      const video = mk('video', {
+        autoplay: true,
+        muted: true,
+        loop: true,
+        playsInline: true,
+        className: 'ds-preloader-content'
+      });
+      const sourceEl = mk('source', { src: preloaderConfig.src });
+      video.appendChild(sourceEl);
+      preloaderOverlay.appendChild(video);
+    }
+    
+    container.appendChild(preloaderOverlay);
+  }
+
+  function hidePreloader() {
+    if (preloaderOverlay && preloaderOverlay.parentNode) {
+      console.log('DS Player: Hiding preloader');
+      preloaderOverlay.parentNode.removeChild(preloaderOverlay);
+      preloaderOverlay = null;
+    }
   }
 
   function render(slide) {
@@ -113,6 +153,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (type === 'video' || type === 'video_url') {
       console.log('DS Player: Creating video element with src:', slide.src);
+      
+      // Show preloader for external video URLs
+      if (type === 'video_url') {
+        showPreloader();
+      }
+      
       const video = mk('video', {
         autoplay: true,
         muted: !autoUnmute,
@@ -140,6 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       video.addEventListener('loadeddata', () => {
         console.log('DS Player: Video data loaded, attempting play');
+        hidePreloader(); // Hide preloader when video is ready
         video.play().catch(err => {
           console.log('DS Player: Video autoplay failed:', err);
           // Show click hint for user interaction
@@ -202,6 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (type === 'youtube' || type === 'webpage' || type === 'calendar') {
+      // Show preloader for YouTube and external webpages
+      showPreloader();
+      
       let src = slide.src;
       // For YouTube, modify URL to include autoplay and mute parameters based on auto_unmute setting
       if (type === 'youtube' && src.includes('youtube.com/embed/')) {
@@ -218,6 +268,21 @@ document.addEventListener('DOMContentLoaded', function() {
         frameBorder: '0',
         className: 'ds-frame'
       });
+      
+      // Hide preloader when iframe loads
+      iframe.addEventListener('load', () => {
+        console.log('DS Player: Iframe loaded');
+        // Delay hiding preloader slightly for YouTube to ensure video starts
+        setTimeout(() => {
+          hidePreloader();
+        }, type === 'youtube' ? 1000 : 100);
+      });
+      
+      // Fallback: hide preloader after a timeout if load event doesn't fire
+      setTimeout(() => {
+        hidePreloader();
+      }, 5000);
+      
       container.appendChild(iframe);
       wait(dur);
       return;

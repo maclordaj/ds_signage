@@ -76,11 +76,28 @@ class DsSignageController(http.Controller):
                 s['html'] = html
             slides.append(s)
 
+        # Prepare preloader data if configured
+        preloader_data = None
+        if screen.preloader_asset_id:
+            preloader = screen.preloader_asset_id
+            ver_dt = preloader.write_date or preloader.create_date
+            ver = ver_dt.strftime('%Y%m%d%H%M%S') if ver_dt else '0'
+            preloader_data = {
+                'type': preloader.type,
+                'src': f"/ds/a/{preloader.id}/content?v={ver}" if preloader.type in ('image', 'video') else None,
+            }
+        
         values = {
             'screen': screen,
             'playlist': playlist,
             'slides_json': json.dumps(slides),
-            'meta_json': json.dumps({'title': f"{playlist.name} — Digital Signage", 'playlist_id': playlist.id, 'screen_token': screen.token, 'auto_unmute': playlist.auto_unmute}),
+            'meta_json': json.dumps({
+                'title': f"{playlist.name} — Digital Signage", 
+                'playlist_id': playlist.id, 
+                'screen_token': screen.token, 
+                'auto_unmute': playlist.auto_unmute,
+                'preloader': preloader_data
+            }),
             'title': f"{playlist.name} — Digital Signage",
         }
         return request.render('ds_signage.player', values)
@@ -132,7 +149,12 @@ class DsSignageController(http.Controller):
             'screen': screen,
             'playlist': playlist,
             'slides_json': json.dumps(slides),
-            'meta_json': json.dumps({'title': f"{playlist.name} — Digital Signage", 'playlist_id': playlist.id, 'auto_unmute': playlist.auto_unmute}),
+            'meta_json': json.dumps({
+                'title': f"{playlist.name} — Digital Signage", 
+                'playlist_id': playlist.id, 
+                'auto_unmute': playlist.auto_unmute,
+                'preloader': None
+            }),
             'title': f"{playlist.name} — Digital Signage",
         }
         return request.render('ds_signage.player', values)
