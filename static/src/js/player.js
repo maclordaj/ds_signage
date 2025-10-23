@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const meta = readJsonScript('ds_meta') || {};
   const autoUnmute = meta.auto_unmute || false;
   const preloaderConfig = meta.preloader || null;
+  const showFullscreenButton = meta.show_fullscreen_button !== false; // Default to true
   const root = document.getElementById('ds_player_root');
   const container = document.getElementById('ds_player');
   
@@ -310,6 +311,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fullscreen functionality
   const fullscreenBtn = document.getElementById('ds_fullscreen_btn');
   let hideTimeout;
+
+  // Hide fullscreen button if disabled in screen configuration
+  if (fullscreenBtn && !showFullscreenButton) {
+    fullscreenBtn.style.display = 'none';
+    console.log('DS Player: Fullscreen button hidden by screen configuration');
+  }
 
   function enterFullscreen() {
     const elem = document.documentElement;

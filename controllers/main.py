@@ -96,7 +96,8 @@ class DsSignageController(http.Controller):
                 'playlist_id': playlist.id, 
                 'screen_token': screen.token, 
                 'auto_unmute': playlist.auto_unmute,
-                'preloader': preloader_data
+                'preloader': preloader_data,
+                'show_fullscreen_button': screen.show_fullscreen_button
             }),
             'title': f"{playlist.name} — Digital Signage",
         }
@@ -153,7 +154,8 @@ class DsSignageController(http.Controller):
                 'title': f"{playlist.name} — Digital Signage", 
                 'playlist_id': playlist.id, 
                 'auto_unmute': playlist.auto_unmute,
-                'preloader': None
+                'preloader': None,
+                'show_fullscreen_button': True
             }),
             'title': f"{playlist.name} — Digital Signage",
         }
