@@ -154,10 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (type === 'video' || type === 'video_url') {
       console.log('DS Player: Creating video element with src:', slide.src);
       
-      // Show preloader for external video URLs
-      if (type === 'video_url') {
-        showPreloader();
-      }
+      // Show preloader for all videos
+      showPreloader();
       
       const video = mk('video', {
         autoplay: true,
@@ -186,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       video.addEventListener('loadeddata', () => {
         console.log('DS Player: Video data loaded, attempting play');
-        hidePreloader(); // Hide preloader when video is ready
         video.play().catch(err => {
           console.log('DS Player: Video autoplay failed:', err);
           // Show click hint for user interaction
@@ -207,7 +204,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
       
+      // Hide preloader when video actually starts playing
+      video.addEventListener('playing', () => {
+        console.log('DS Player: Video is now playing');
+        hidePreloader();
+      }, { once: true });
+      
       video.addEventListener('error', (e) => {
+        hidePreloader(); // Hide preloader on error too
         const errorCodes = {
           1: 'MEDIA_ERR_ABORTED - Video loading aborted',
           2: 'MEDIA_ERR_NETWORK - Network error loading video', 
@@ -272,16 +276,17 @@ document.addEventListener('DOMContentLoaded', function() {
       // Hide preloader when iframe loads
       iframe.addEventListener('load', () => {
         console.log('DS Player: Iframe loaded');
-        // Delay hiding preloader slightly for YouTube to ensure video starts
+        // Delay hiding preloader for YouTube/webpages to ensure content is visible
         setTimeout(() => {
           hidePreloader();
-        }, type === 'youtube' ? 1000 : 100);
+        }, type === 'youtube' ? 2000 : 500);
       });
       
       // Fallback: hide preloader after a timeout if load event doesn't fire
       setTimeout(() => {
+        console.log('DS Player: Fallback timeout - hiding preloader');
         hidePreloader();
-      }, 5000);
+      }, 8000);
       
       container.appendChild(iframe);
       wait(dur);
