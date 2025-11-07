@@ -1,5 +1,6 @@
-/* Digital Signage fullscreen styles */
-html, body { 
+/* Digital Signage fullscreen styles - scoped to player pages only */
+.ds-signage-player-page html,
+.ds-signage-player-page body { 
   height: 100vh; 
   margin: 0; 
   padding: 0; 
@@ -13,7 +14,9 @@ html, body {
 }
 
 /* Hide Odoo layout elements for fullscreen experience */
-.o_main_navbar, .o_main_content > header, .o_main_content > footer { display: none !important; }
+.ds-signage-player-page .o_main_navbar,
+.ds-signage-player-page .o_main_content > header,
+.ds-signage-player-page .o_main_content > footer { display: none !important; }
 
 #ds_player_root { 
   position: fixed; 
@@ -265,5 +268,5 @@ html, body {
 }
 
 /* Kiosk mode - hide scrollbars and browser UI */
-::-webkit-scrollbar { display: none; }
-html { -ms-overflow-style: none; scrollbar-width: none; }
+.ds-signage-player-page ::-webkit-scrollbar { display: none; }
+.ds-signage-player-page html { -ms-overflow-style: none; scrollbar-width: none; }
