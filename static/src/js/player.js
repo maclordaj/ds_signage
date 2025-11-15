@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let idx = -1;
   let timer = null;
   let preloaderOverlay = null;
+  let preloadedPreloaderElement = null;
 
   function clear() {
     if (timer) {
@@ -72,8 +73,41 @@ document.addEventListener('DOMContentLoaded', function() {
     return el;
   }
 
-  function showPreloader() {
+  // Preload the preloader asset once at startup
+  function preloadPreloaderAsset() {
     if (!preloaderConfig || !preloaderConfig.src) {
+      console.log('DS Player: No preloader configured');
+      return;
+    }
+    
+    console.log('DS Player: Preloading preloader asset');
+    
+    if (preloaderConfig.type === 'image') {
+      preloadedPreloaderElement = mk('img', { src: preloaderConfig.src, className: 'ds-preloader-content' });
+      // Preload by setting src - browser will cache it
+      preloadedPreloaderElement.addEventListener('load', () => {
+        console.log('DS Player: Preloader asset cached and ready');
+      });
+      preloadedPreloaderElement.addEventListener('error', () => {
+        console.error('DS Player: Failed to preload preloader asset');
+      });
+    } else if (preloaderConfig.type === 'video') {
+      preloadedPreloaderElement = mk('video', {
+        muted: true,
+        loop: true,
+        playsInline: true,
+        className: 'ds-preloader-content',
+        preload: 'auto'
+      });
+      const sourceEl = mk('source', { src: preloaderConfig.src });
+      preloadedPreloaderElement.appendChild(sourceEl);
+      // Preload video metadata
+      preloadedPreloaderElement.load();
+    }
+  }
+
+  function showPreloader() {
+    if (!preloadedPreloaderElement) {
       console.log('DS Player: No preloader configured');
       return;
     }
@@ -83,22 +117,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     preloaderOverlay = mk('div', { className: 'ds-preloader-overlay' });
     
-    if (preloaderConfig.type === 'image') {
-      const img = mk('img', { src: preloaderConfig.src, className: 'ds-preloader-content' });
-      preloaderOverlay.appendChild(img);
-    } else if (preloaderConfig.type === 'video') {
-      const video = mk('video', {
-        autoplay: true,
-        muted: true,
-        loop: true,
-        playsInline: true,
-        className: 'ds-preloader-content'
+    // Clone the preloaded element to reuse it
+    const preloaderClone = preloadedPreloaderElement.cloneNode(true);
+    
+    // If video, restart playback
+    if (preloaderConfig.type === 'video') {
+      preloaderClone.muted = true;
+      preloaderClone.autoplay = true;
+      preloaderClone.load();
+      preloaderClone.play().catch(err => {
+        console.log('DS Player: Preloader video autoplay failed:', err);
       });
-      const sourceEl = mk('source', { src: preloaderConfig.src });
-      video.appendChild(sourceEl);
-      preloaderOverlay.appendChild(video);
     }
     
+    preloaderOverlay.appendChild(preloaderClone);
     container.appendChild(preloaderOverlay);
   }
 
@@ -112,9 +144,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function render(slide) {
     console.log('DS Player: Rendering slide:', slide);
-    clear();
     const type = slide.type;
     const dur = Math.max(1, parseInt(slide.duration || 10, 10)) * 1000;
+    
+    // Show preloader on top BEFORE clearing and loading the new slide
+    // This ensures no gap or browser loading indicators show
+    const needsPreloader = (type === 'video' || type === 'video_url' || type === 'youtube' || type === 'webpage' || type === 'calendar');
+    if (needsPreloader) {
+      showPreloader();
+    }
+    
+    // Now clear and load the slide underneath the preloader
+    clear();
 
     if (type === 'image') {
       console.log('DS Player: Creating image element with src:', slide.src);
@@ -154,9 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (type === 'video' || type === 'video_url') {
       console.log('DS Player: Creating video element with src:', slide.src);
-      
-      // Show preloader for all videos
-      showPreloader();
       
       const video = mk('video', {
         autoplay: true,
@@ -254,9 +292,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (type === 'youtube' || type === 'webpage' || type === 'calendar') {
-      // Show preloader for YouTube and external webpages
-      showPreloader();
-      
       let src = slide.src;
       // For YouTube, modify URL to include autoplay and mute parameters based on auto_unmute setting
       if (type === 'youtube' && src.includes('youtube.com/embed/')) {
@@ -370,6 +405,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 2000);
   }
+
+  // Preload the preloader asset if configured
+  preloadPreloaderAsset();
 
   if (slides.length) {
     console.log('DS Player: Starting slideshow with', slides.length, 'slides');
