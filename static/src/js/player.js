@@ -48,7 +48,14 @@ document.addEventListener('DOMContentLoaded', function() {
       clearTimeout(timer);
       timer = null;
     }
-    while (container.firstChild) container.removeChild(container.firstChild);
+    // Remove all children except the preloader overlay
+    while (container.firstChild) {
+      if (container.firstChild === preloaderOverlay) {
+        // Skip the preloader, keep it on top
+        break;
+      }
+      container.removeChild(container.firstChild);
+    }
   }
 
   function next() {
@@ -131,7 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     preloaderOverlay.appendChild(preloaderClone);
-    container.appendChild(preloaderOverlay);
+    // Add preloader as first child so it's on top (with z-index)
+    container.insertBefore(preloaderOverlay, container.firstChild);
   }
 
   function hidePreloader() {
