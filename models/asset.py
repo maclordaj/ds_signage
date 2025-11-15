@@ -121,6 +121,8 @@ class DsAsset(models.Model):
     url = fields.Char(string="URL")
     qweb_key = fields.Char(string="QWeb XML ID", help="XML ID of a QWeb template to render for this slide (e.g., module.template_id)")
     duration = fields.Integer(string="Duration (seconds)", default=10, help="Default time to show this asset if not a video with natural length")
+    cache_content = fields.Boolean(string="Cache Content", default=True,
+                                    help="For webpages and calendars: cache the iframe and reuse it when cycling. Disable for dynamic content like weather or live data.")
     active = fields.Boolean(default=True)
 
     _sql_constraints = [

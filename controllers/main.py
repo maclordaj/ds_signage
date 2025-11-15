@@ -49,6 +49,7 @@ class DsSignageController(http.Controller):
                 'name': asset.name,
                 'type': asset.type,
                 'duration': item.duration_override or asset.duration or 10,
+                'cache_content': asset.cache_content if hasattr(asset, 'cache_content') else True,
             }
             if asset.type in ('image', 'video'):
                 # Cache buster so browser refetches when asset changes and to avoid stale headers
@@ -97,7 +98,9 @@ class DsSignageController(http.Controller):
                 'screen_token': screen.token, 
                 'auto_unmute': playlist.auto_unmute,
                 'preloader': preloader_data,
-                'show_fullscreen_button': screen.show_fullscreen_button
+                'show_fullscreen_button': screen.show_fullscreen_button,
+                'cache_slides': screen.cache_slides,
+                'preload_next_slide': screen.preload_next_slide
             }),
             'title': f"{playlist.name} — Digital Signage",
         }
@@ -122,6 +125,7 @@ class DsSignageController(http.Controller):
                 'name': asset.name,
                 'type': asset.type,
                 'duration': item.duration_override or asset.duration or 10,
+                'cache_content': asset.cache_content if hasattr(asset, 'cache_content') else True,
             }
             if asset.type in ('image', 'video'):
                 s['src'] = f"/ds/a/{asset.id}/content"
@@ -155,7 +159,9 @@ class DsSignageController(http.Controller):
                 'playlist_id': playlist.id, 
                 'auto_unmute': playlist.auto_unmute,
                 'preloader': None,
-                'show_fullscreen_button': True
+                'show_fullscreen_button': True,
+                'cache_slides': False,
+                'preload_next_slide': False
             }),
             'title': f"{playlist.name} — Digital Signage",
         }

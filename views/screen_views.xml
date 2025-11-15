@@ -24,13 +24,19 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="playlist_id"/>
-                        <field name="preloader_asset_id" domain="[('type', 'in', ['image', 'video'])]"/>
-                        <field name="token" readonly="1"/>
-                        <field name="show_fullscreen_button"/>
-                        <field name="is_public"/>
-                        <field name="active"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="playlist_id"/>
+                            <field name="token" readonly="1"/>
+                            <field name="is_public"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="preloader_asset_id" domain="[('type', 'in', ['image', 'video'])]"/>
+                            <field name="show_fullscreen_button"/>
+                            <field name="cache_slides"/>
+                            <field name="preload_next_slide"/>
+                        </group>
                     </group>
                     <group>
                         <field name="last_ping" readonly="1"/>

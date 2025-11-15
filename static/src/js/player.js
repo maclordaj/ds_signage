@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const autoUnmute = meta.auto_unmute || false;
   const preloaderConfig = meta.preloader || null;
   const showFullscreenButton = meta.show_fullscreen_button !== false; // Default to true
+  const cacheSlides = meta.cache_slides || false;
+  const preloadNextSlide = meta.preload_next_slide || false;
   const root = document.getElementById('ds_player_root');
   const container = document.getElementById('ds_player');
   
@@ -42,6 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let timer = null;
   let preloaderOverlay = null;
   let preloadedPreloaderElement = null;
+  const slideCache = {}; // Cache for rendered slide elements
+  let preloadedSlideElement = null; // Preloaded next slide
 
   function clear() {
     if (timer) {
@@ -153,6 +157,56 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('DS Player: Rendering slide:', slide);
     const type = slide.type;
     const dur = Math.max(1, parseInt(slide.duration || 10, 10)) * 1000;
+    const shouldCache = cacheSlides && slide.cache_content !== false;
+    const cacheKey = `slide_${slide.id}`;
+    
+    // Check if we have a cached version of this slide
+    if (shouldCache && slideCache[cacheKey]) {
+      console.log('DS Player: Using cached slide:', slide.name);
+      
+      // For cached videos, restart playback properly
+      if (type === 'video' || type === 'video_url') {
+        // Show preloader for cached videos too
+        showPreloader();
+        
+        clear();
+        const video = slideCache[cacheKey];
+        container.appendChild(video);
+        
+        // Reset video to beginning
+        video.currentTime = 0;
+        video.load(); // Reload the video source to reset state
+        
+        // Re-attach playing event listener to hide preloader
+        video.addEventListener('playing', () => {
+          console.log('DS Player: Cached video is now playing');
+          hidePreloader();
+        }, { once: true });
+        
+        // Re-attach ended event listener
+        video.addEventListener('ended', next, { once: true });
+        
+        // Start playback
+        video.play().catch(err => {
+          console.log('DS Player: Cached video play failed:', err);
+          hidePreloader();
+        });
+        
+        wait(dur + 2000);
+      } else {
+        // For non-video cached slides (images, iframes, qweb)
+        clear();
+        container.appendChild(slideCache[cacheKey]);
+        wait(dur);
+      }
+      
+      // Preload next slide if enabled
+      if (preloadNextSlide) {
+        const nextIdx = (idx + 1) % slides.length;
+        startPreloadNextSlide(slides[nextIdx]);
+      }
+      return;
+    }
     
     // Show preloader on top BEFORE clearing and loading the new slide
     // This ensures no gap or browser loading indicators show
@@ -196,7 +250,20 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       container.appendChild(img);
+      
+      // Cache the image element if caching is enabled
+      if (shouldCache) {
+        slideCache[cacheKey] = img;
+        console.log('DS Player: Cached image slide:', slide.name);
+      }
+      
       wait(dur);
+      
+      // Preload next slide if enabled
+      if (preloadNextSlide) {
+        const nextIdx = (idx + 1) % slides.length;
+        startPreloadNextSlide(slides[nextIdx]);
+      }
       return;
     }
 
@@ -295,6 +362,18 @@ document.addEventListener('DOMContentLoaded', function() {
       // Fallback timer in case video doesn't end naturally
       wait(dur + 2000);
       container.appendChild(video);
+      
+      // Cache the video element if caching is enabled
+      if (shouldCache) {
+        slideCache[cacheKey] = video;
+        console.log('DS Player: Cached video slide:', slide.name);
+      }
+      
+      // Preload next slide if enabled
+      if (preloadNextSlide) {
+        const nextIdx = (idx + 1) % slides.length;
+        startPreloadNextSlide(slides[nextIdx]);
+      }
       return;
     }
 
@@ -332,7 +411,20 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 8000);
       
       container.appendChild(iframe);
+      
+      // Cache the iframe if caching is enabled AND this slide allows caching
+      if (shouldCache && slide.cache_content !== false) {
+        slideCache[cacheKey] = iframe;
+        console.log('DS Player: Cached iframe slide:', slide.name);
+      }
+      
       wait(dur);
+      
+      // Preload next slide if enabled
+      if (preloadNextSlide) {
+        const nextIdx = (idx + 1) % slides.length;
+        startPreloadNextSlide(slides[nextIdx]);
+      }
       return;
     }
 
@@ -340,7 +432,20 @@ document.addEventListener('DOMContentLoaded', function() {
       const wrap = mk('div', { className: 'ds-qweb' });
       wrap.innerHTML = slide.html || '';
       container.appendChild(wrap);
+      
+      // Cache QWeb if caching is enabled
+      if (shouldCache) {
+        slideCache[cacheKey] = wrap;
+        console.log('DS Player: Cached QWeb slide:', slide.name);
+      }
+      
       wait(dur);
+      
+      // Preload next slide if enabled
+      if (preloadNextSlide) {
+        const nextIdx = (idx + 1) % slides.length;
+        startPreloadNextSlide(slides[nextIdx]);
+      }
       return;
     }
 
@@ -348,6 +453,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const err = mk('div', { className: 'ds-error', innerText: 'Unsupported slide type: ' + String(type) });
     container.appendChild(err);
     wait(3000);
+  }
+
+  // Preload the next slide in background
+  function startPreloadNextSlide(nextSlide) {
+    if (!nextSlide) return;
+    
+    const cacheKey = `slide_${nextSlide.id}`;
+    const shouldCache = cacheSlides && nextSlide.cache_content !== false;
+    
+    // If already cached, no need to preload
+    if (shouldCache && slideCache[cacheKey]) {
+      console.log('DS Player: Next slide already cached, skip preload');
+      return;
+    }
+    
+    console.log('DS Player: Preloading next slide:', nextSlide.name);
+    
+    // Preload based on type
+    if (nextSlide.type === 'image') {
+      const img = new Image();
+      img.src = nextSlide.src;
+      // Browser will cache it automatically
+    } else if (nextSlide.type === 'video' || nextSlide.type === 'video_url') {
+      // Create hidden video element to trigger buffering
+      const video = mk('video', {
+        preload: 'auto',
+        muted: true,
+        style: 'position:absolute;width:0;height:0;opacity:0;pointer-events:none;'
+      });
+      const sourceEl = mk('source', { src: nextSlide.src });
+      video.appendChild(sourceEl);
+      video.load();
+      document.body.appendChild(video);
+      // Clean up after 5 seconds
+      setTimeout(() => {
+        if (video.parentNode) video.parentNode.removeChild(video);
+      }, 5000);
+    }
+    // YouTube and iframes benefit less from preloading, skip them
   }
 
   // Fullscreen functionality

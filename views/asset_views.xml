@@ -29,6 +29,7 @@
                         <field name="url" invisible="type not in ['video_url', 'youtube', 'webpage', 'calendar', 'qweb']"/>
                         <field name="qweb_key" invisible="type != 'qweb'"/>
                         <field name="duration"/>
+                        <field name="cache_content" invisible="type not in ('webpage', 'calendar')"/>
                         <field name="active"/>
                     </group>
                 </sheet>
