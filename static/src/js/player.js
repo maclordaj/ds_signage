@@ -49,12 +49,11 @@ document.addEventListener('DOMContentLoaded', function() {
       timer = null;
     }
     // Remove all children except the preloader overlay
-    while (container.firstChild) {
-      if (container.firstChild === preloaderOverlay) {
-        // Skip the preloader, keep it on top
-        break;
+    const children = Array.from(container.children);
+    for (const child of children) {
+      if (child !== preloaderOverlay) {
+        container.removeChild(child);
       }
-      container.removeChild(container.firstChild);
     }
   }
 
