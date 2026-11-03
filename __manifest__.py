@@ -2,7 +2,7 @@
 {
     "name": "Digital Signage",
     "summary": "Playlists of images, videos, webpages, and QWeb templates for screens",
-    "version": "19.0.1.4.0",
+    "version": "19.0.1.5.0",
     "category": "Marketing",
     "author": "Independent Solutions",
     "website": "https://isolpa.com",

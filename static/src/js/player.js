@@ -73,10 +73,35 @@ document.addEventListener('DOMContentLoaded', function() {
     render(slides[idx]);
   }
 
-  // Auto-refresh: at the end of each loop, re-fetch this page and reload only if the playlist
-  // (slides list, incl. each asset's ?v= version) changed. Network errors are ignored (keeps playing).
-  const initialSlidesRaw = (document.getElementById('ds_slides') || {}).textContent || '';
+  // Auto-refresh: at the end of each loop, re-fetch this page and, if the playlist (slides list, incl. each
+  // asset's ?v= version) changed, swap it IN PLACE — no page reload, so the browser stays in fullscreen.
+  // A changed preloader is swapped in place too. Network errors are ignored (keeps playing).
+  let currentSlidesRaw = ((document.getElementById('ds_slides') || {}).textContent || '').trim();
+  let currentPreloaderSrc = preloaderConfig && preloaderConfig.src;
   let updateCheckInFlight = false;
+  function applyNewSlides(raw) {
+    let fresh;
+    try { fresh = JSON.parse(raw); } catch (e) { return; }
+    if (!Array.isArray(fresh) || !fresh.length) return;
+    slides.length = 0;
+    fresh.forEach(function (s) { slides.push(s); });
+    Object.keys(slideCache).forEach(function (k) { delete slideCache[k]; });
+    preloadedSlideElement = null;
+    currentSlidesRaw = raw;
+    console.log('DS Player: playlist updated in place,', slides.length, 'slides');
+  }
+  function applyNewPreloader(html) {
+    const mm = html.match(/<script id="ds_meta" type="application\/json">([\s\S]*?)<\/script>/);
+    if (!mm || !preloaderConfig) return;
+    let fresh;
+    try { fresh = (JSON.parse(mm[1]) || {}).preloader; } catch (e) { return; }
+    if (fresh && fresh.src && fresh.src !== currentPreloaderSrc) {
+      Object.assign(preloaderConfig, fresh);
+      currentPreloaderSrc = fresh.src;
+      preloadPreloaderAsset();
+      console.log('DS Player: preloader updated in place');
+    }
+  }
   function checkForUpdate() {
     if (updateCheckInFlight || !window.fetch) return;
     updateCheckInFlight = true;
@@ -85,10 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function (html) {
         if (!html) return;
         const m = html.match(/<script id="ds_slides" type="application\/json">([\s\S]*?)<\/script>/);
-        if (m && m[1].trim() && m[1].trim() !== initialSlidesRaw.trim()) {
-          console.log('DS Player: playlist changed, reloading');
-          window.location.reload();
-        }
+        if (m && m[1].trim() && m[1].trim() !== currentSlidesRaw) applyNewSlides(m[1].trim());
+        applyNewPreloader(html);
       })
       .catch(function () { /* offline: keep playing what we have */ })
       .finally(function () { updateCheckInFlight = false; });
