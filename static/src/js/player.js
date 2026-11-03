@@ -66,9 +66,32 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('DS Player: No slides available in next()');
       return;
     }
+    const wrapped = idx >= 0 && (idx + 1) % slides.length === 0;
     idx = (idx + 1) % slides.length;
+    if (wrapped) checkForUpdate();
     console.log('DS Player: Moving to slide', idx, 'of', slides.length);
     render(slides[idx]);
+  }
+
+  // Auto-refresh: at the end of each loop, re-fetch this page and reload only if the playlist
+  // (slides list, incl. each asset's ?v= version) changed. Network errors are ignored (keeps playing).
+  const initialSlidesRaw = (document.getElementById('ds_slides') || {}).textContent || '';
+  let updateCheckInFlight = false;
+  function checkForUpdate() {
+    if (updateCheckInFlight || !window.fetch) return;
+    updateCheckInFlight = true;
+    fetch(window.location.href, { cache: 'no-store', credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (html) {
+        if (!html) return;
+        const m = html.match(/<script id="ds_slides" type="application\/json">([\s\S]*?)<\/script>/);
+        if (m && m[1].trim() && m[1].trim() !== initialSlidesRaw.trim()) {
+          console.log('DS Player: playlist changed, reloading');
+          window.location.reload();
+        }
+      })
+      .catch(function () { /* offline: keep playing what we have */ })
+      .finally(function () { updateCheckInFlight = false; });
   }
 
   function wait(ms) {
